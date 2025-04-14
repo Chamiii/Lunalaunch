@@ -1,15 +1,15 @@
-
 import streamlit as st
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 from solana.rpc.api import Client
 from spl.token.constants import TOKEN_PROGRAM_ID
 from spl.token.client import Token
+from solana.publickey import PublicKey
 from metadata_generator import create_metadata_json
 from ipfs_helper import upload_to_ipfs
 from base58 import b58decode
 
-st.title("🪙 LaunchTool Clone — Modern Version (solana + solders)")
+st.title("🪙 LaunchTool Clone — Modern Solana + Solders")
 
 client = Client("https://api.devnet.solana.com")
 
@@ -35,8 +35,8 @@ else:
     st.warning("Paste your private key to continue.")
     st.stop()
 
-# Use solders.Pubkey directly
-pubkey = keypair.pubkey()
+# Convert solders.Pubkey to solana.PublicKey
+pubkey = PublicKey(keypair.pubkey())
 
 # Token setup
 st.subheader("Token Details")
@@ -65,7 +65,7 @@ if st.button("Create Token"):
             TOKEN_PROGRAM_ID,
         )
 
-        st.info("Creating ATA...")
+        st.info("Creating Associated Token Account...")
         ata = token.create_associated_token_account(pubkey)
 
         st.info("Minting tokens...")
@@ -73,17 +73,17 @@ if st.button("Create Token"):
         token.mint_to(
             ata,
             keypair,
-            amount.to_solders(),  # required for latest solana-py
+            amount,
             signer_pubkey=pubkey
         )
 
-        st.info("Uploading metadata...")
+        st.info("Uploading metadata to IPFS...")
         metadata_json = create_metadata_json(name, symbol, desc, logo, website)
         metadata_uri = upload_to_ipfs(metadata_json)
 
         st.success("🎉 Token Created!")
-        st.write("Mint Address:", token.pubkey)
-        st.write("Metadata URI:", metadata_uri)
+        st.write("🧾 Token Mint Address:", token.pubkey)
+        st.write("🌐 Metadata URI:", metadata_uri)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
