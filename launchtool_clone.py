@@ -1,15 +1,15 @@
+
 import streamlit as st
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 from solana.rpc.api import Client
 from spl.token.constants import TOKEN_PROGRAM_ID
 from spl.token.client import Token
-from solana.publickey import PublicKey
 from metadata_generator import create_metadata_json
 from ipfs_helper import upload_to_ipfs
 from base58 import b58decode
 
-st.title("🪙 LaunchTool Clone — Modern Solana + Solders")
+st.title("🪙 LaunchTool Clone — Streamlit Cloud Compatible")
 
 client = Client("https://api.devnet.solana.com")
 
@@ -35,8 +35,8 @@ else:
     st.warning("Paste your private key to continue.")
     st.stop()
 
-# Convert solders.Pubkey to solana.PublicKey
-pubkey = PublicKey(keypair.pubkey())
+# Use solders.Pubkey directly
+pubkey = keypair.pubkey()
 
 # Token setup
 st.subheader("Token Details")
@@ -73,7 +73,7 @@ if st.button("Create Token"):
         token.mint_to(
             ata,
             keypair,
-            amount,
+            amount.to_solders(),  # required with solana-py 0.29+
             signer_pubkey=pubkey
         )
 
