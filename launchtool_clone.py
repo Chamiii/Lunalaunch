@@ -1,15 +1,14 @@
 import streamlit as st
 from solders.keypair import Keypair
-from solders.pubkey import Pubkey
+from solana.publickey import PublicKey  
 from solana.rpc.api import Client
-from solana.pubkey import Pubkey as SolanaPubkey
 from spl.token.constants import TOKEN_PROGRAM_ID
 from spl.token.client import Token
 from metadata_generator import create_metadata_json
 from ipfs_helper import upload_to_ipfs
 from base58 import b58decode
 
-st.title("🪙 LaunchTool Clone — FINAL Streamlit Cloud Fix")
+st.title("🪙 LaunchTool Clone — Stable Version for Streamlit Cloud")
 
 client = Client("https://api.devnet.solana.com")
 
@@ -34,8 +33,8 @@ else:
     st.warning("Paste your private key to continue.")
     st.stop()
 
-# ✅ Convert solders.Pubkey to solana.pubkey.Pubkey
-pubkey = SolanaPubkey.from_bytes(bytes(keypair.pubkey()))
+# ✅ Compatible with solana==0.26.0
+pubkey = PublicKey(keypair.pubkey())
 
 # Token setup
 st.subheader("Token Details")
@@ -71,7 +70,7 @@ if st.button("Create Token"):
         token.mint_to(
             ata,
             keypair,
-            amount.to_solders(),
+            amount.to_solders(),  # Required when using solders keypair
             signer_pubkey=pubkey
         )
 
@@ -79,8 +78,8 @@ if st.button("Create Token"):
         metadata_json = create_metadata_json(name, symbol, desc, logo, website)
         metadata_uri = upload_to_ipfs(metadata_json)
 
-        st.success("🎉 Token Created!")
-        st.write("🧾 Token Mint Address:", token.pubkey)
+        st.success("🎉 Token Created Successfully!")
+        st.write("🧾 Mint Address:", str(token.pubkey))
         st.write("🌐 Metadata URI:", metadata_uri)
 
     except Exception as e:
